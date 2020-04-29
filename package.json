@@ -1,0 +1,21 @@
+{
+  "name": "puff",
+  "version": "1.0.0",
+  "description": "Puff the Magic Dragon on Google Cloud Functions",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "start": "functions-framework --target=helloWorld"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YMD7/puff.git"
+  },
+  "author": "Kyo Yamada",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YMD7/puff/issues"
+  },
+  "homepage": "https://github.com/YMD7/puff#readme"
+}
