@@ -6,7 +6,7 @@
   "dependencies": {},
   "devDependencies": {},
   "scripts": {
-    "start": "functions-framework --target=helloWorld"
+    "start": "functions-framework"
   },
   "repository": {
     "type": "git",
