@@ -6,7 +6,7 @@
   "dependencies": {},
   "devDependencies": {},
   "scripts": {
-    "start": "functions-framework"
+    "start": "functions-framework --source=functions/lunch"
   },
   "repository": {
     "type": "git",
