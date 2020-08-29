@@ -9,7 +9,9 @@
     "dotenv": "^8.2.0",
     "googleapis": "^59.0.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^7.7.0"
+  },
   "scripts": {
     "start": "functions-framework",
     "dev": "functions-framework --source=functions/calendar/index.js"
