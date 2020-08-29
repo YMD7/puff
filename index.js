@@ -8,7 +8,7 @@ const app = new App({
 
 exports.function = async (req, res) => {
   try {
-    if (req.method !== 'GET') {
+    if (req.method !== 'POST') {
       const error = new Error('Only POST requests are accepted');
       error.code = 405;
       throw error;
