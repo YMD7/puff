@@ -13,6 +13,13 @@ exports.function = async (req, res) => {
       error.code = 405;
       throw error;
     }
+
+    const response = {
+      "challenge": req.body.challenge
+    };
+    res.json(response);
+
+    return Promise.resolve();
   } catch (err) {
     console.error(err);
     res.status(err.code || 500).send(err);
