@@ -2,7 +2,12 @@ const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
 
-const SCOPE = ['https://www.googleapis.com/auth/calendar.readonly'];
+const SCOPE = [
+  'https://www.googleapis.com/auth/calendar',
+  'https://www.googleapis.com/auth/calendar.readonly',
+  'https://www.googleapis.com/auth/calendar.events',
+  'https://www.googleapis.com/auth/calendar.events.readonly'
+];
 const TOKEN_PATH = 'token.json';
 
 const authorize = ( credentials, callback ) => {
@@ -45,33 +50,29 @@ const getAccessToken = ( oAuth2Client, callback ) => {
 const listEvents = ( auth ) => {
   const calendar = google.calendar({ version: 'v3', auth });
   calendar.events.list({
-    calendarId: 'primary',
-    timeMin: (new Date()).toISOString(),
-    maxResults: 10,
+    calendarId: 'tamura.t@edocode.co.jp',
     singleEvents: true,
-    orderBy: 'startTime',
+    timeMin: new Date('2020-09-14 12:30'),
+    timeMax: new Date('2020-09-14 14:00')
   }, ( err, res ) => {
     if (err) return console.log('The API returned an error: ' + err);
     const events = res.data.items;
-    if (events.length) {
-      console.log('Upcoming 10 events:');
-      events.map(( event, i ) => {
-        const start = event.start.dateTime || event.start.date;
-        console.log(`${start} - ${event.summary}`);
-      });
-    } else {
-      console.log('No upcoming events found.');
-    }
+    console.log(events);
   });
 }
 
-exports.function = async (req, res) => {
-  fs.readFile('credentials.json', ( err, content ) => {
-    if (err) return console.log('Error loading client secret file:', err);
-    authorize(JSON.parse(content), listEvents);
-  });
+fs.readFile('credentials.json', ( err, content ) => {
+  if (err) return console.log('Error loading client secret file:', err);
+  authorize(JSON.parse(content), listEvents);
+});
 
-  res.send('hello');
-  return Promise.resolve();
-};
+// exports.function = async (req, res) => {
+//   fs.readFile('credentials.json', ( err, content ) => {
+//     if (err) return console.log('Error loading client secret file:', err);
+//     authorize(JSON.parse(content), listEvents);
+//   });
+//
+//   res.send('hello');
+//   return Promise.resolve();
+// };
 
