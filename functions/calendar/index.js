@@ -9,6 +9,7 @@ const SCOPE = [
   'https://www.googleapis.com/auth/calendar.events.readonly'
 ];
 const TOKEN_PATH = 'token.json';
+const CREDENTIAL_PATH = 'credentials.json';
 
 const authorize = ( credentials, callback ) => {
   const { client_secret, client_id, redirect_uris } = credentials.web;
@@ -42,6 +43,14 @@ const getAccessToken = ( oAuth2Client, callback ) => {
         if (err) return console.error(err);
         console.log('Token stored to', TOKEN_PATH);
       });
+      fs.readFile(CREDENTIAL_PATH, ( err, credentials ) => {
+        if (err) return console.error(err);
+        const json = JSON.parse(credentials);
+        json.web.auth_code = code;
+        fs.writeFile(CREDENTIAL_PATH, JSON.stringify(json), ( err ) => {
+          if (err) return console.error(err);
+        });
+      });
       callback(oAuth2Client);
     });
   });
@@ -61,10 +70,11 @@ const listEvents = ( auth ) => {
   });
 }
 
-fs.readFile('credentials.json', ( err, content ) => {
+fs.readFile(CREDENTIAL_PATH, ( err, content ) => {
   if (err) return console.log('Error loading client secret file:', err);
   authorize(JSON.parse(content), listEvents);
 });
+
 
 // exports.function = async (req, res) => {
 //   fs.readFile('credentials.json', ( err, content ) => {
