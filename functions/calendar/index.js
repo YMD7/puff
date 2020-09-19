@@ -43,14 +43,6 @@ const getAccessToken = ( oAuth2Client, callback ) => {
         if (err) return console.error(err);
         console.log('Token stored to', TOKEN_PATH);
       });
-      fs.readFile(CREDENTIAL_PATH, ( err, credentials ) => {
-        if (err) return console.error(err);
-        const json = JSON.parse(credentials);
-        json.web.auth_code = code;
-        fs.writeFile(CREDENTIAL_PATH, JSON.stringify(json), ( err ) => {
-          if (err) return console.error(err);
-        });
-      });
       callback(oAuth2Client);
     });
   });
