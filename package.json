@@ -18,7 +18,8 @@
   },
   "scripts": {
     "start": "functions-framework",
-    "dev": "functions-framework --source=functions/calendar/index.js"
+    "dev": "functions-framework --source=functions/calendar/index.js",
+    "node": "npx babel-node functions/calendar/index.js"
   },
   "repository": {
     "type": "git",
