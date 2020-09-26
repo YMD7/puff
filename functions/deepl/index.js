@@ -1,11 +1,12 @@
 import axios from 'axios'
+require('dotenv').config()
 
 async function translate () {
   try {
     const host = 'api.deepl.com'
     const v = 'v2'
     const type = 'translate'
-    const authKey = '6c7d20eb-ae49-7963-7ef9-20fccfd20130'
+    const authKey = process.env.DEEPL_AUTH_KEY
     const url = 'https://' + host + '/' + v + '/' + type
 
     const method = 'POST'
