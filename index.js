@@ -1,10 +1,17 @@
+const { WebClient } = require('@slack/web-api')
 require('dotenv').config()
-const { App } = require('@slack/bolt')
 
-const app = new App({
-  token: process.env.SLACK_BOT_TOKEN,
-  signingSecret: process.env.SLACK_SIGNING_SECRET
-})
+const web = new WebClient(process.env.SLACK_BOT_TOKEN)
+
+const reactionedMessage = async (body) => {
+  const res = await web.conversations.history({
+    channel: body.event.item.channel,
+    latest: body.event.item.ts,
+    inclusive: true,
+    limit: 1
+  })
+  return res
+}
 
 exports.function = async (req, res) => {
   try {
@@ -14,15 +21,21 @@ exports.function = async (req, res) => {
       throw error
     }
 
-    const response = {
-      challenge: req.body.challenge
+    // Slack Event Subscriptions challenge
+    if (req.body.challenge) {
+      res.json({ challenge: req.body.challenge })
     }
-    res.json(response)
 
+    const message = reactionedMessage(req.body)
+    if (message.ok) {
+    }
+
+    res.send('OK')
     return Promise.resolve()
   } catch (err) {
     console.error(err)
     res.status(err.code || 500).send(err)
+
     return Promise.reject(err)
   }
 }

@@ -6,6 +6,8 @@
   "dependencies": {
     "@google-cloud/functions-framework": "^1.7.1",
     "@slack/bolt": "^2.3.0",
+    "@slack/events-api": "^2.3.4",
+    "@slack/web-api": "^5.12.0",
     "axios": "^0.20.0",
     "dayjs": "^1.8.36",
     "dotenv": "^8.2.0",
