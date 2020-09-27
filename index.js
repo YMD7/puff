@@ -20,7 +20,7 @@ const sendMessage = async (text, channel) => {
   return Promise.resolve(res)
 }
 
-exports.function = async (req, res) => {
+exports.deepPuff = async (req, res) => {
   try {
     if (req.method !== 'POST') {
       const error = new Error('Only POST requests are accepted')
