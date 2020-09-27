@@ -17,7 +17,6 @@ const sendMessage = async (text, channel) => {
   const res = await web.chat.postMessage({
     text, channel
   })
-  console.log(res)
   return Promise.resolve(res)
 }
 
@@ -34,15 +33,24 @@ exports.function = async (req, res) => {
       res.json({ challenge: req.body.challenge })
     }
 
+    // console.log(req)
     // Verify Request
     res.send('OK')
 
+    const reaction = req.body.event.reaction
+    if (!/deep-puff/.test(reaction)) {
+      return Promise.resolve()
+    }
+
     const message = await getReactionedPost(req.body)
+    console.log(message)
     if (message.ok) {
+      const text = '> ' + message.messages[0].text + '\n'
       const translation = await deepl.translate(message)
-      console.log(translation)
-      const sendResult = await sendMessage(translation[0].text, req.body.event.item.channel)
-      console.log(sendResult)
+      await sendMessage(
+        text + ':deep-puff-right: :flag-jp: _' + translation[0].text + '_',
+        req.body.event.item.channel
+      )
     }
 
     return Promise.resolve()
