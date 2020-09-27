@@ -4,13 +4,20 @@ require('dotenv').config()
 
 const web = new WebClient(process.env.SLACK_BOT_TOKEN)
 
-const reactionedMessage = async (body) => {
+const getReactionedPost = async (body) => {
   const res = await web.conversations.history({
     channel: body.event.item.channel,
     latest: body.event.item.ts,
     inclusive: true,
     limit: 1
   })
+  return Promise.resolve(res)
+}
+const sendMessage = async (text, channel) => {
+  const res = await web.chat.postMessage({
+    text, channel
+  })
+  console.log(res)
   return Promise.resolve(res)
 }
 
@@ -27,18 +34,17 @@ exports.function = async (req, res) => {
       res.json({ challenge: req.body.challenge })
     }
 
-    console.log('start')
-    const message = await reactionedMessage(req.body)
-    console.log(message)
+    // Verify Request
+    res.send('OK')
+
+    const message = await getReactionedPost(req.body)
     if (message.ok) {
-      console.log('message OK')
       const translation = await deepl.translate(message)
-      console.log('translate OK')
       console.log(translation)
+      const sendResult = await sendMessage(translation[0].text, req.body.event.item.channel)
+      console.log(sendResult)
     }
 
-    console.log('res OK')
-    res.send('OK')
     return Promise.resolve()
   } catch (err) {
     console.error(err)
