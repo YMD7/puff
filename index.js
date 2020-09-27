@@ -1,4 +1,5 @@
 const { WebClient } = require('@slack/web-api')
+const deepl = require('./functions/deepl')
 require('dotenv').config()
 
 const web = new WebClient(process.env.SLACK_BOT_TOKEN)
@@ -10,7 +11,7 @@ const reactionedMessage = async (body) => {
     inclusive: true,
     limit: 1
   })
-  return res
+  return Promise.resolve(res)
 }
 
 exports.function = async (req, res) => {
@@ -26,10 +27,17 @@ exports.function = async (req, res) => {
       res.json({ challenge: req.body.challenge })
     }
 
-    const message = reactionedMessage(req.body)
+    console.log('start')
+    const message = await reactionedMessage(req.body)
+    console.log(message)
     if (message.ok) {
+      console.log('message OK')
+      const translation = await deepl.translate(message)
+      console.log('translate OK')
+      console.log(translation)
     }
 
+    console.log('res OK')
     res.send('OK')
     return Promise.resolve()
   } catch (err) {
