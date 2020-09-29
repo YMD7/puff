@@ -3,6 +3,9 @@
 credentials.json
 token.json
 
+# Google Service Account
+keyfile.json
+
 # Ngrok as a tunnel to localhost
 ngrok
 
