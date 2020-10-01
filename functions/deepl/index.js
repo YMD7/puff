@@ -16,12 +16,16 @@ exports.translate = async (source, targetLang = 'JA') => {
 
     const text = source.replace(/<@\w+>/g, '')
     const params = { auth_key: authKey, text, target_lang: targetLang }
-    const res = await axios({
+    let res = await axios({
       method, url, headers, params
     })
 
+    if (res.data.translations[0].detected_source_language === targetLang) {
+      res = await this.translate(source, 'EN')
+    }
+
     console.log('DeepL OK')
-    return Promise.resolve(res.data.translations)
+    return Promise.resolve(res)
   } catch (err) {
     console.log(err)
   }

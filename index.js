@@ -33,8 +33,7 @@ exports.deepPuff = async (req, res) => {
       res.json({ challenge: req.body.challenge })
     }
 
-    // console.log(req)
-    // Verify Request
+    // TODO: Verify Request
     res.send('OK')
 
     const reaction = req.body.event.reaction
@@ -43,16 +42,16 @@ exports.deepPuff = async (req, res) => {
     }
 
     const message = await getReactionedPost(req.body)
-    console.log(message)
     if (message.ok) {
       const sourceText = message.messages[0].text
+      const result = await deepl.translate(sourceText)
+      const translation = result.data.translations[0]
+
+      const lang = result.config.params.target_lang
+      const langs = { JA: 'jp', EN: 'gb' }
       const text = '> ' + sourceText + '\n'
-      const translation = await deepl.translate(sourceText)
-      console.log(translation)
-      const isJA = translation.detected_source_language === 'JA'
-      console.log(isJA)
       await sendMessage(
-        text + ':deep-puff-right: :flag-jp: _' + translation[0].text + '_',
+        text + ':deep-puff-right: :flag-' + langs[lang] + ': _' + translation.text + '_',
         req.body.event.item.channel
       )
     }
