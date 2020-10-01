@@ -61,3 +61,22 @@ exports.deepPuff = async (req, res) => {
     return Promise.reject(err)
   }
 }
+<<<<<<< HEAD
+=======
+
+const google = require('./functions/google')
+exports.googleAuth = async (req, res) => {
+  try {
+    console.log('Start')
+    const result = await google.auth()
+    console.log(result)
+
+    return Promise.resolve()
+  } catch (err) {
+    console.error(err)
+    res.status(err.code || 500).send(err)
+
+    return Promise.reject(err)
+  }
+}
+>>>>>>> origin/master

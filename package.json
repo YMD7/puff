@@ -4,6 +4,10 @@
   "description": "Puff the Magic Dragon on Google Cloud Functions",
   "main": "index.js",
   "dependencies": {
+<<<<<<< HEAD
+=======
+    "@google-cloud/firestore": "^4.2.0",
+>>>>>>> origin/master
     "@google-cloud/functions-framework": "^1.7.1",
     "@slack/bolt": "^2.3.0",
     "@slack/events-api": "^2.3.4",
@@ -29,7 +33,12 @@
     "eslint-plugin-react": "^7.20.6",
     "eslint-plugin-react-hooks": "^4.1.2",
     "eslint-plugin-standard": "^4.0.1",
+<<<<<<< HEAD
     "prettier": "^2.1.2"
+=======
+    "prettier": "^2.1.2",
+    "node-forge": ">=0.10.0"
+>>>>>>> origin/master
   },
   "scripts": {
     "start": "functions-framework",
