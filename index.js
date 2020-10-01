@@ -51,10 +51,10 @@ exports.deepPuff = async (req, res) => {
       console.log(translation)
       const isJA = translation.detected_source_language === 'JA'
       console.log(isJA)
-      // await sendMessage(
-      //   text + ':deep-puff-right: :flag-jp: _' + translation[0].text + '_',
-      //   req.body.event.item.channel
-      // )
+      await sendMessage(
+        text + ':deep-puff-right: :flag-jp: _' + translation[0].text + '_',
+        req.body.event.item.channel
+      )
     }
 
     return Promise.resolve()
