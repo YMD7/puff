@@ -1,7 +1,7 @@
 const axios = require('axios')
 require('dotenv').config()
 
-exports.translate = async (message) => {
+exports.translate = async (source, targetLang = 'JA') => {
   try {
     const host = 'api.deepl.com'
     const v = 'v2'
@@ -14,8 +14,7 @@ exports.translate = async (message) => {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
 
-    const text = message.messages[0].text.replace(/<@\w+>/g, '')
-    const targetLang = 'JA'
+    const text = source.replace(/<@\w+>/g, '')
     const params = { auth_key: authKey, text, target_lang: targetLang }
     const res = await axios({
       method, url, headers, params

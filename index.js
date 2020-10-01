@@ -45,12 +45,16 @@ exports.deepPuff = async (req, res) => {
     const message = await getReactionedPost(req.body)
     console.log(message)
     if (message.ok) {
-      const text = '> ' + message.messages[0].text + '\n'
-      const translation = await deepl.translate(message)
-      await sendMessage(
-        text + ':deep-puff-right: :flag-jp: _' + translation[0].text + '_',
-        req.body.event.item.channel
-      )
+      const sourceText = message.messages[0].text
+      const text = '> ' + sourceText + '\n'
+      const translation = await deepl.translate(sourceText)
+      console.log(translation)
+      const isJA = translation.detected_source_language === 'JA'
+      console.log(isJA)
+      // await sendMessage(
+      //   text + ':deep-puff-right: :flag-jp: _' + translation[0].text + '_',
+      //   req.body.event.item.channel
+      // )
     }
 
     return Promise.resolve()
