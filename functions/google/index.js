@@ -1,17 +1,12 @@
-const Firestore = require('@google-cloud/firestore')
+const admin = require('firebase-admin')
 
-const db = new Firestore({
-  projectId: 'e-puff',
-  keyFilename: 'keyfile.json'
-})
+const db = admin.firestore()
 
 exports.auth = async () => {
   try {
-    const credential = db.collection('google-api').doc('credential')
-    await credential.set({
-      client_id: 'CLIENT_ID',
-      client_secret: 'CLIENT_SECRET',
-      redirect_uris: 'REDIRECT_URIS'
+    const ref = db.collection('google-api').doc('credential')
+    ref.get().then(doc => {
+      console.log(doc.data())
     })
 
     return Promise.resolve()

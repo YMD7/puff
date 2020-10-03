@@ -37,10 +37,7 @@
     "node-forge": ">=0.10.0"
   },
   "scripts": {
-    "start": "functions-framework",
-    "dev": "functions-framework --source=functions/calendar/index.js",
-    "ngrok": "./ngrok http 8080",
-    "node": "npx babel-node functions/calendar/index.js"
+    "ngrok": "./ngrok http 8080"
   },
   "repository": {
     "type": "git",

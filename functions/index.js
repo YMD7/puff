@@ -1,5 +1,9 @@
+const functions = require('firebase-functions')
+const admin = require('firebase-admin')
+admin.initializeApp()
+
 const { WebClient } = require('@slack/web-api')
-const deepl = require('./functions/deepl')
+const deepl = require('./deepl')
 require('dotenv').config()
 
 const web = new WebClient(process.env.SLACK_BOT_TOKEN)
@@ -65,12 +69,11 @@ exports.deepPuff = async (req, res) => {
   }
 }
 
-const google = require('./functions/google')
-exports.googleAuth = async (req, res) => {
+const google = require('./google')
+exports.googleAuth = functions.https.onRequest(async (req, res) => {
   try {
     console.log('Start')
-    const result = await google.auth()
-    console.log(result)
+    await google.auth()
 
     return Promise.resolve()
   } catch (err) {
@@ -79,4 +82,4 @@ exports.googleAuth = async (req, res) => {
 
     return Promise.reject(err)
   }
-}
+})
