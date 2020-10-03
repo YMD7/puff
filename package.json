@@ -12,6 +12,9 @@
     "axios": "^0.20.0",
     "dayjs": "^1.8.36",
     "dotenv": "^8.2.0",
+    "firebase": "^7.22.0",
+    "firebase-admin": "^9.2.0",
+    "firebase-functions": "^3.11.0",
     "googleapis": "^59.0.0"
   },
   "devDependencies": {
