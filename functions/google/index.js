@@ -1,18 +1,10 @@
 const { google } = require('googleapis')
 const admin = require('firebase-admin')
-
 const db = admin.firestore()
 
-const getDocData = async (ref) => {
-  return await ref.get()
-    .then(doc => {
-      return doc.exists ? doc.data() : console.log('No such document!')
-    })
-    .catch(err => {
-      console.error('Error getting document', err)
-    })
-}
-
+/******************************
+ * Google OAuthClient
+ ******************************/
 exports.auth = async () => {
   try {
     const cRef = await db.collection('google-api').doc('credential')
@@ -33,16 +25,30 @@ exports.auth = async () => {
   }
 }
 
-exports.calendar = async (auth) => {
+const getDocData = async (ref) => {
+  return await ref.get()
+    .then(doc => {
+      return doc.exists ? doc.data() : console.log('No such document!')
+    })
+    .catch(err => {
+      console.error('Error getting document', err)
+    })
+}
+
+/******************************
+ * Google Calendar
+ ******************************/
+exports.calendar = async () => {
+  console.log('calendar start')
+  const auth = await module.exports.auth()
   const calendar = google.calendar({ version: 'v3', auth })
-  calendar.events.list({
+  const res = await calendar.events.list({
     calendarId: 'tamura.t@edocode.co.jp',
     singleEvents: true,
     timeMin: new Date('2020-09-14 12:30'),
     timeMax: new Date('2020-09-14 14:00')
-  }, (err, res) => {
-    if (err) return console.log(`The API returned an error: ${err}`)
-    const events = res.data.items
-    console.log(events)
   })
+  const events = res.data.items
+
+  return Promise.resolve(events)
 }

@@ -1,13 +1,27 @@
+require('dotenv').config()
+
+/*
+ * Firebase
+ */
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 admin.initializeApp()
 
+/*
+ * Slack
+ */
 const { WebClient } = require('@slack/web-api')
 const deepl = require('./deepl')
-require('dotenv').config()
-
 const web = new WebClient(process.env.SLACK_BOT_TOKEN)
 
+/*
+ * Google
+ */
+const google = require('./google')
+
+/******************************
+ * Deep Puff
+ ******************************/
 const getReactionedPost = async (body) => {
   const res = await web.conversations.history({
     channel: body.event.item.channel,
@@ -17,6 +31,7 @@ const getReactionedPost = async (body) => {
   })
   return Promise.resolve(res)
 }
+
 const sendMessage = async (text, channel) => {
   const res = await web.chat.postMessage({
     text, channel
@@ -69,12 +84,14 @@ exports.deepPuff = async (req, res) => {
   }
 }
 
-const google = require('./google')
-exports.googleAuth = functions.https.onRequest(async (req, res) => {
+/******************************
+ * Puff Lunch
+ ******************************/
+exports.puffLunch = functions.https.onRequest(async (req, res) => {
   try {
     console.log('Start')
-    const auth = await google.auth()
-    google.calendar(auth)
+    const calendarList = await google.calendar()
+    console.log(calendarList)
 
     return Promise.resolve()
   } catch (err) {
