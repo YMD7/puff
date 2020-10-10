@@ -73,7 +73,8 @@ const google = require('./google')
 exports.googleAuth = functions.https.onRequest(async (req, res) => {
   try {
     console.log('Start')
-    await google.auth()
+    const auth = await google.auth()
+    google.calendar(auth)
 
     return Promise.resolve()
   } catch (err) {
