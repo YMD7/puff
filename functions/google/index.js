@@ -1,3 +1,5 @@
+/* functions/google/index.js */
+
 const { google } = require('googleapis')
 const admin = require('firebase-admin')
 const db = admin.firestore()
@@ -39,7 +41,14 @@ const getDocData = async (ref) => {
  * Google Calendar
  ******************************/
 exports.calendar = async () => {
-  console.log('calendar start')
+  console.log('calendar api start')
+  const auth = await module.exports.auth()
+  const calendar = google.calendar({ version: 'v3', auth })
+
+  return Promise.resolve(calendar)
+}
+exports.calendarEvents = async () => {
+  console.log('calendarList start')
   const auth = await module.exports.auth()
   const calendar = google.calendar({ version: 'v3', auth })
   const res = await calendar.events.list({
