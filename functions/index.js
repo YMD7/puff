@@ -1,4 +1,4 @@
-require('dotenv').config()
+/* functions/index.js */
 
 /*
  * Firebase
@@ -11,13 +11,22 @@ admin.initializeApp()
  * Slack
  */
 const { WebClient } = require('@slack/web-api')
-const web = new WebClient(process.env.SLACK_BOT_TOKEN)
+const web = new WebClient(functions.config().slack.bot_token)
 
 const slackSendMessage = async (text, channel) => {
   const res = await web.chat.postMessage({
     text, channel
   })
   return Promise.resolve(res)
+}
+
+const getSlackIds = async (emails) => {
+  const ids = []
+  for (const email of emails) {
+    const res = await web.users.lookupByEmail({ email })
+    res.ok ? ids.push(res.user.id) : ids.push(email)
+  }
+  return Promise.resolve(ids)
 }
 
 /*
@@ -101,19 +110,34 @@ const getReactionedPost = async (body) => {
 /******************************
  * Puff Lunch
  ******************************/
-exports.puffLunch = functions.https.onRequest(async (req, res) => {
+exports.puffLunch = functions.region('asia-northeast1').https.onRequest(async (req, res) => {
   try {
-    // const puffLunchDate = await getNextPuffLunch()
-    // const timeMin = new Date(dayjs.tz(puffLunchDate).hour(12).minute(30))
-    // const timeMax = new Date(dayjs.tz(puffLunchDate).hour(13).minute(30))
-    // const regulars = await getRegularMembers()
-    // const availables = await getAvailables(regulars, { timeMin, timeMax })
-    const lunchMembers = await lottery(availables, 4)
-    const text = 'test'
-    const channel = 'GALKKHGTS' // #onion-test
-    await slackSendMessage(text, channel)
+    const puffLunchDate = await getNextPuffLunch()
+    const startTime = dayjs.tz(puffLunchDate).hour(12).minute(30)
+    const endTime = dayjs.tz(puffLunchDate).hour(13).minute(30)
+    const timeMin = new Date(startTime)
+    const timeMax = new Date(endTime)
 
-    return Promise.resolve()
+    const regulars = await getRegularMembers()
+    const availables = await getAvailables(regulars, { timeMin, timeMax })
+    const participants = await lottery(availables, 4)
+    const userIds = await getSlackIds(participants)
+
+    const text = await getPuffLunchText(userIds, startTime, endTime)
+    const channel = functions.config().slack.channel_id.onion_test
+    const slackResponse = await slackSendMessage(text, channel)
+    console.log(text)
+
+    if (slackResponse.ok) {
+      console.log('--------------------------')
+      console.log(' Puff posted the message!')
+      console.log('--------------------------')
+      return Promise.resolve()
+    } else {
+      console.log('Slack chat.postMessage API responded error XO')
+      res.status(500).send(slackResponse.error)
+      return Promise.reject(slackResponse.error)
+    }
   } catch (err) {
     console.error(err)
     res.status(err.code || 500).send(err)
@@ -205,4 +229,84 @@ const lottery = (ids, cap) => {
   }
 
   return Promise.resolve(ids)
+}
+
+const getPuffLunchText = async (ids, startTime, endTime) => {
+  /*
+   * Header of text
+   */
+  const date = dayjs.tz(startTime).hour(0).minute(0).second(0)
+  const now = dayjs.tz().hour(0).minute(0).second(0)
+  const daysAfter = Math.round(date.diff(now, 'day', true))
+  const dayNames = ['', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日']
+
+  let nextLunchTime = '次回'
+  const weeks = Math.round(date.diff(now, 'week'))
+  switch (daysAfter < 3) {
+    case true:
+      if (daysAfter === 1) nextLunchTime = '明日'
+      if (daysAfter === 2) nextLunchTime = 'あさって'
+      break
+
+    case false:
+      if (weeks === 0) {
+        if (now.day() < date.day()) nextLunchTime = dayNames[date.day()]
+        if (now.day() >= date.day()) nextLunchTime = '来週' + dayNames[date.day()]
+      }
+      if (weeks === 1) {
+        if (now.day() < date.day()) nextLunchTime = '来週' + dayNames[date.day()]
+        if (now.day() >= date.day()) nextLunchTime = '再来週' + dayNames[date.day()]
+      }
+      if (weeks === 2) {
+        if (now.day() < date.day()) nextLunchTime = '再来週' + dayNames[date.day()]
+      }
+      break
+
+    default:
+      break
+  }
+  let text = ':broccoli: ' + nextLunchTime + 'のランチ :broccoli:\n\n'
+
+  /*
+   * Body of text
+   */
+  if (ids.length === 0) {
+    text += ':puff_right::sweat_drops: ん〜〜〜 この時間帯は誰も空いてないみたいだ〜〜 :man-gesturing-no:\n他の時間帯とかはどうか試してみてはどうかな！:point_up::puff:'
+  } else if (ids.length < 4) {
+    let users = ''
+    for (const id of ids) {
+      users = users + '<@' + id + '>さん\n'
+    }
+    text += ':puff_right: おしいっ:bangbang: :puff:\n' + users + 'は空いてるみたいなんだけど、あと ' + (4 - ids.length) + '人いないと 4人で行けない〜:dizzy_face:\n残念だけど、また別の機会だね〜〜 :raised_hands:'
+  } else {
+    const date =
+      startTime.year() + '/' + (startTime.month() + 1) + '/' + startTime.date() +
+      '(' + ['日', '月', '火', '水', '木', '金', '土'][startTime.day()] + ')'
+    const startEnd =
+      startTime.hour() + ':' +
+      (startTime.minute() < 10 ? '0' + startTime.minute() : startTime.minute()) +
+      ' - ' +
+      endTime.hour() + ':' +
+      (endTime.minute() < 10 ? '0' + endTime.minute() : endTime.minute())
+
+    text += ':v: こちらの皆さんでどうですか〜！\n\n:curry: <@' + ids[0] + '>（ホスト）\n:bento: <@' + ids[1] + '>\n:hamburger: <@' + ids[2] + '>\n:coffee: <@' + ids[3] + '>\n\n> :spiral_calendar_pad: ' + date + ' ' + startEnd + ' :call_me_hand:\nこの予定でいけるか、:o: or :x: でリアクションしてくれよ〜！:puff_right::+1:\n'
+  }
+
+  /*
+   * If any member has not resistered email on Slack
+   */
+  const membersNotResisteredEmail = text.match(/<@[a-z]+\.[a-z]+@edocode\.co\.jp>/g)
+
+  if (membersNotResisteredEmail !== null) {
+    let byTheWay = '\nちなみに、'
+    for (const member of membersNotResisteredEmail) {
+      const target = member.match(/@[a-z]+\.[a-z]+/)[0]
+      text = text.replace(member, '`' + target + '`')
+      byTheWay = byTheWay + ' `' + target + '`' + ' さん、'
+    }
+    byTheWay = byTheWay.replace(/、$/, '') + 'は Slack のユーザーとしてメールアドレスが登録されてないですよ！'
+    text = text + byTheWay
+  }
+
+  return Promise.resolve(text)
 }
