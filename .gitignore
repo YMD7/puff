@@ -1,4 +1,7 @@
 ### Puff
+# Firebase Functions
+.runtimeconfig.json
+
 # Google APIs
 credentials.json
 token.json
