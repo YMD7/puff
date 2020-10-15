@@ -114,6 +114,32 @@ const getReactionedPost = async (body) => {
 /******************************
  * Puff Lunch
  ******************************/
+const cron = 'every mon,tue,wed,thu,fri 14:00'
+const tz = 'Asia/Tokyo'
+exports.puffLunchCron = functions.pubsub.schedule(cron).timeZone(tz).onRun(async () => {
+  const calendar = await google.calendar()
+  const timeMin = new Date(dayjs.tz().startOf('date'))
+  const timeMax = new Date(dayjs.tz().endOf('date'))
+  console.log('Today is [ ' + dayjs.tz().format('YYYY/MM/DD ddd') + ' ].')
+
+  const response = await calendar.events.list({
+    calendarId: 'ja.japanese#holiday@group.v.calendar.google.com',
+    singleEvents: true,
+    timeMin,
+    timeMax
+  })
+  if (response.status !== 200) return null
+
+  if (response.data.items.length) {
+    console.log('Today is holiday! :D')
+    return null
+  }
+
+  console.log('Kick Puff to post lunch!')
+  module.exports.puffLunch()
+  return null
+})
+
 exports.puffLunch = functions.region('asia-northeast1').https.onRequest(async (req, res) => {
   try {
     const puffLunchDate = await getNextPuffLunch()
