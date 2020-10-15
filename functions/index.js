@@ -5,7 +5,11 @@
  */
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
-admin.initializeApp()
+const serviceAccount = require('./serviceAccountKey.json')
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://e-puff.firebaseio.com'
+})
 
 /*
  * Slack
@@ -124,14 +128,17 @@ exports.puffLunch = functions.region('asia-northeast1').https.onRequest(async (r
     const userIds = await getSlackIds(participants)
 
     const text = await getPuffLunchText(userIds, startTime, endTime)
-    const channel = functions.config().slack.channel_id.onion_test
+    const channel = functions.config().slack.channel_id.e_random
     const slackResponse = await slackSendMessage(text, channel)
     console.log(text)
 
     if (slackResponse.ok) {
+      const message = 'Puff posted the message!'
       console.log('--------------------------')
-      console.log(' Puff posted the message!')
+      console.log(' ' + message)
       console.log('--------------------------')
+
+      res.status(200).send(message)
       return Promise.resolve()
     } else {
       console.log('Slack chat.postMessage API responded error XO')
