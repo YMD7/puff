@@ -2,12 +2,8 @@
 # Firebase Functions
 .runtimeconfig.json
 
-# Google APIs
-credentials.json
-token.json
-
-# Google Service Account
-keyfile.json
+# Firebase Service Account
+serviceAccountKey.json
 
 # Ngrok as a tunnel to localhost
 ngrok
