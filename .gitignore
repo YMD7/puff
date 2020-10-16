@@ -1,4 +1,7 @@
 ### Puff
+# Credentials
+keyfile.json
+
 # Firebase Functions
 .runtimeconfig.json
 
