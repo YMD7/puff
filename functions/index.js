@@ -56,7 +56,7 @@ dayjs.tz.setDefault('Asia/Tokyo')
 /******************************
  * Deep Puff
  ******************************/
-exports.deepPuff = async (req, res) => {
+exports.deepPuff = functions.region('asia-northeast1').https.onRequest(async (req, res) => {
   try {
     if (req.method !== 'POST') {
       const error = new Error('Only POST requests are accepted')
@@ -101,7 +101,7 @@ exports.deepPuff = async (req, res) => {
 
     return Promise.reject(err)
   }
-}
+})
 
 const getReactionedPost = async (body) => {
   const res = await web.conversations.history({
