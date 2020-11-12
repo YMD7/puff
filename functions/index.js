@@ -84,14 +84,17 @@ exports.deepPuff = functions.region('asia-northeast1').https.onRequest(async (re
 
       const result = await deepl.translate(sourceText)
       const translation = result.data.translations[0]
+      console.log(translation)
 
       const lang = result.config.params.target_lang
       const langs = { JA: 'jp', EN: 'gb' }
       const text = '> ' + sourceText + '\n'
-      await slackSendMessage(
+
+      const sendResult = await slackSendMessage(
         text + ':deep-puff-right: :flag-' + langs[lang] + ': _' + translation.text + '_',
         req.body.event.item.channel
       )
+      console.log(sendResult)
     }
 
     return Promise.resolve()
@@ -159,7 +162,7 @@ exports.puffLunch = functions.region('asia-northeast1').https.onRequest(async (r
     const userIds = await getSlackIds(participants)
 
     const text = await getPuffLunchText(userIds, startTime, endTime)
-    const channel = functions.config().slack.channel_id.onion_test
+    const channel = functions.config().slack.channel_id.e_random
     const slackResponse = await slackSendMessage(text, channel)
     console.log(text)
 
