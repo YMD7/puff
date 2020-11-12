@@ -1,3 +1,11 @@
+/*
+ * TODO:
+ * - deepPuff, puffLunch 両方の関数が一つの index.js で動かせるようにする
+ * - いまの状態だと、Puff アプリの Slack Bot Token しか使えない
+ * - なので、Slack SDK の初期化を2つに分けて使えるか試してみる
+ *
+ */
+
 /* functions/index.js */
 
 /*
