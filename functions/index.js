@@ -128,7 +128,10 @@ exports.puffLunchCron = functions.pubsub.schedule(cron).timeZone(tz).onRun(async
     timeMin,
     timeMax
   })
-  if (response.status !== 200) return null
+  if (response.status !== 200) {
+    console.log('The Calendar of Japanese Holiday did not return 200, then the function stopped.')
+    return null
+  }
 
   if (response.data.items.length) {
     console.log('Today is holiday! :D')
@@ -154,7 +157,7 @@ exports.puffLunch = functions.region('asia-northeast1').https.onRequest(async (r
     const userIds = await getSlackIds(participants)
 
     const text = await getPuffLunchText(userIds, startTime, endTime)
-    const channel = functions.config().slack.channel_id.e_random
+    const channel = functions.config().slack.channel_id.onion_test
     const slackResponse = await slackSendMessage(text, channel)
     console.log(text)
 
