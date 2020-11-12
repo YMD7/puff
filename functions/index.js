@@ -80,6 +80,8 @@ exports.deepPuff = async (req, res) => {
     const message = await getReactionedPost(req.body)
     if (message.ok) {
       const sourceText = message.messages[0].text
+      console.log(sourceText)
+
       const result = await deepl.translate(sourceText)
       const translation = result.data.translations[0]
 
