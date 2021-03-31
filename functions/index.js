@@ -4,12 +4,6 @@
  * Firebase
  */
 const functions = require('firebase-functions')
-const admin = require('firebase-admin')
-const serviceAccount = require('./serviceAccountKey.json')
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://e-puff.firebaseio.com'
-})
 
 /*
  * Slack
@@ -122,18 +116,18 @@ exports.puffLunchCron = functions.pubsub.schedule(cron).timeZone(tz).onRun(async
   const timeMax = new Date(dayjs.tz().endOf('date'))
   console.log('Today is [ ' + dayjs.tz().format('YYYY/MM/DD ddd') + ' ].')
 
-  const response = await calendar.events.list({
+  const res = await calendar.events.list({
     calendarId: 'ja.japanese#holiday@group.v.calendar.google.com',
     singleEvents: true,
     timeMin,
     timeMax
   })
-  if (response.status !== 200) {
+  if (res.status !== 200) {
     console.log('The Calendar of Japanese Holiday did not return 200, then the function stopped.')
     return null
   }
 
-  if (response.data.items.length) {
+  if (res.data.items.length) {
     console.log('Today is holiday! :D')
     return null
   }
@@ -145,16 +139,30 @@ exports.puffLunchCron = functions.pubsub.schedule(cron).timeZone(tz).onRun(async
 
 exports.puffLunch = functions.region('asia-northeast1').https.onRequest(async (req, res) => {
   try {
+    console.log('\n-------- Getting the next puff lunch date. --------')
     const puffLunchDate = await getNextPuffLunch()
     const startTime = dayjs.tz(puffLunchDate).hour(12).minute(30)
     const endTime = dayjs.tz(puffLunchDate).hour(13).minute(30)
     const timeMin = new Date(startTime)
     const timeMax = new Date(endTime)
+    console.log(`-------- Next puff lunch is on ${timeMin} --------`)
 
+    console.log('\n-------- Getting the regular members. --------')
     const regulars = await getRegularMembers()
+    console.log(`-------- Total: ${regulars.length} regular members. --------`)
+
+    console.log('\n-------- Getting the available members. --------')
     const availables = await getAvailables(regulars, { timeMin, timeMax })
+    console.log(`-------- Total: ${availables.length} available members. --------`)
+
+    console.log('\n-------- Choosing the participants. --------')
     const participants = await lottery(availables, 4)
+    console.log('-------- Participants: --------')
+    console.log(participants)
+
+    console.log('\n-------- Getting Slack Ids of participants. --------')
     const userIds = await getSlackIds(participants)
+    console.log(userIds)
 
     const text = await getPuffLunchText(userIds, startTime, endTime)
     const channel = functions.config().slack.channel_id.onion_test
@@ -195,7 +203,13 @@ const getNextPuffLunch = async () => {
 }
 
 const getNextPuffLunchDate = async (d) => {
-  const calendar = await google.calendar()
+  const scopes = [
+    'https://www.googleapis.com/auth/calendar.readonly',
+    'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/calendar.events.readonly',
+    'https://www.googleapis.com/auth/calendar.events'
+  ]
+  const calendar = await google.apis('calendar', 'v3', scopes)
   const timeMin = new Date(d.startOf('date').format())
   const timeMax = new Date(d.endOf('date').format())
   const res = await calendar.events.list({
@@ -210,25 +224,28 @@ const getNextPuffLunchDate = async (d) => {
 }
 
 const getRegularMembers = async () => {
-  const calendar = await google.calendar()
-  const res = await calendar.calendarList.list()
-  const calendarList = res.data.items
-  const expections = [
-    'android.device@edocode.co.jp', 'akasaka.a@edocode.co.jp'
+  const scopes = [
+    'https://www.googleapis.com/auth/admin.directory.group.member'
   ]
-  const ids = []
-  for (const cal of calendarList) {
-    if (/@edocode.co.jp/.test(cal.id) && expections.indexOf(cal.id) === -1) {
-      ids.push(cal.id)
-    }
-  }
+  const directory = await google.apis('admin', 'directory_v1', scopes)
+  const res = await directory.members.list({
+    groupKey: 'regular@edocode.co.jp'
+  })
+
+  const ids = res.data.members.map((member) => { return member.email })
+
+  console.log('-------- Regular Members: --------')
+  console.log(ids)
 
   return Promise.resolve(ids)
 }
 
 const getAvailables = async (ids, times) => {
+  const scopes = [
+    'https://www.googleapis.com/auth/calendar.events.readonly'
+  ]
+  const calendar = await google.apis('calendar', 'v3', scopes)
   const { timeMin, timeMax } = times
-  const calendar = await google.calendar()
   const availables = ids.slice(0)
   for (const calendarId of ids) {
     const res = await calendar.events.list({

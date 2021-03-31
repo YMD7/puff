@@ -1,25 +1,19 @@
 /* functions/google/index.js */
 
 const { google } = require('googleapis')
-const admin = require('firebase-admin')
-const db = admin.firestore()
 
 /******************************
  * Google OAuthClient
  ******************************/
-exports.auth = async () => {
+exports.auth = async (scopes) => {
   try {
-    const cRef = await db.collection('google-api').doc('credential')
-    const credential = await getDocData(cRef)
-    const tRef = await db.collection('google-api').doc('token')
-    const token = await getDocData(tRef)
+    const auth = new google.auth.JWT({
+      keyFile: './keyfile.json',
+      scopes,
+      subject: 'kato.a@edocode.co.jp'
+    })
 
-    const oAuth2Client = new google.auth.OAuth2(
-      credential.client_id, credential.client_secret, credential.redirect_uris[0]
-    )
-    oAuth2Client.setCredentials(token)
-
-    return Promise.resolve(oAuth2Client)
+    return Promise.resolve(auth)
   } catch (err) {
     console.error(err)
 
@@ -27,37 +21,13 @@ exports.auth = async () => {
   }
 }
 
-const getDocData = async (ref) => {
-  return await ref.get()
-    .then(doc => {
-      return doc.exists ? doc.data() : console.log('No such document!')
-    })
-    .catch(err => {
-      console.error('Error getting document', err)
-    })
-}
-
 /******************************
- * Google Calendar
+ * Google APIs
  ******************************/
-exports.calendar = async () => {
-  console.log('calendar api start')
-  const auth = await module.exports.auth()
-  const calendar = google.calendar({ version: 'v3', auth })
+exports.apis = async (name, version, scopes) => {
+  console.log(`Preparing Google ${name} API`)
+  const auth = await module.exports.auth(scopes)
+  const service = await google[name]({ version, auth })
 
-  return Promise.resolve(calendar)
-}
-exports.calendarEvents = async () => {
-  console.log('calendarList start')
-  const auth = await module.exports.auth()
-  const calendar = google.calendar({ version: 'v3', auth })
-  const res = await calendar.events.list({
-    calendarId: 'tamura.t@edocode.co.jp',
-    singleEvents: true,
-    timeMin: new Date('2020-09-14 12:30'),
-    timeMax: new Date('2020-09-14 14:00')
-  })
-  const events = res.data.items
-
-  return Promise.resolve(events)
+  return Promise.resolve(service)
 }
