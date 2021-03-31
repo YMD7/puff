@@ -14,6 +14,10 @@
   - `--only functions` がないと、`firestore` もローカルで起動してしまうので注意
   - localhost を listen し始めたら、ターミナルに表示される URL にリクエストを投げる
   - ブラウザでも良いし、`$ curl http://localhost:5001/e-puff/asia-northeast1/puffLunch` みたいにしても良い
+#### 関数のデバッグ
+- `$ firebase functions:shell` を実行する
+  - 起動に成功すると、`firebase >` のようにインタラクションモードに入る
+  - `puffLunch()` のように関数を実行すると、処理がスタートする
 #### デプロイ
 `$ firebase deploy --only functions:puffLunch`
 #### 環境変数を設定する
