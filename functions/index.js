@@ -1,3 +1,11 @@
+/*
+ * TODO:
+ * - deepPuff, puffLunch 両方の関数が一つの index.js で動かせるようにする
+ * - いまの状態だと、Puff アプリの Slack Bot Token しか使えない
+ * - なので、Slack SDK の初期化を2つに分けて使えるか試してみる
+ *
+ */
+
 /* functions/index.js */
 
 /*
@@ -50,7 +58,7 @@ dayjs.tz.setDefault('Asia/Tokyo')
 /******************************
  * Deep Puff
  ******************************/
-exports.deepPuff = async (req, res) => {
+exports.deepPuff = functions.region('asia-northeast1').https.onRequest(async (req, res) => {
   try {
     if (req.method !== 'POST') {
       const error = new Error('Only POST requests are accepted')
@@ -74,16 +82,21 @@ exports.deepPuff = async (req, res) => {
     const message = await getReactionedPost(req.body)
     if (message.ok) {
       const sourceText = message.messages[0].text
+      console.log(sourceText)
+
       const result = await deepl.translate(sourceText)
       const translation = result.data.translations[0]
+      console.log(translation)
 
       const lang = result.config.params.target_lang
       const langs = { JA: 'jp', EN: 'gb' }
       const text = '> ' + sourceText + '\n'
-      await slackSendMessage(
+
+      const sendResult = await slackSendMessage(
         text + ':deep-puff-right: :flag-' + langs[lang] + ': _' + translation.text + '_',
         req.body.event.item.channel
       )
+      console.log(sendResult)
     }
 
     return Promise.resolve()
@@ -93,7 +106,7 @@ exports.deepPuff = async (req, res) => {
 
     return Promise.reject(err)
   }
-}
+})
 
 const getReactionedPost = async (body) => {
   const res = await web.conversations.history({
@@ -108,7 +121,7 @@ const getReactionedPost = async (body) => {
 /******************************
  * Puff Lunch
  ******************************/
-const cron = 'every mon,tue,wed,thu,fri 09:00'
+const cron = 'every mon,tue,wed,thu,fri 14:00'
 const tz = 'Asia/Tokyo'
 exports.puffLunchCron = functions.pubsub.schedule(cron).timeZone(tz).onRun(async () => {
   const calendar = await google.calendar()
@@ -165,7 +178,7 @@ exports.puffLunch = functions.region('asia-northeast1').https.onRequest(async (r
     console.log(userIds)
 
     const text = await getPuffLunchText(userIds, startTime, endTime)
-    const channel = functions.config().slack.channel_id.onion_test
+    const channel = functions.config().slack.channel_id.e_random
     const slackResponse = await slackSendMessage(text, channel)
     console.log(text)
 
