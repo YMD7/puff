@@ -121,7 +121,7 @@ const getReactionedPost = async (body) => {
 /******************************
  * Puff Lunch
  ******************************/
-const cron = 'every mon,tue,wed,thu,fri 14:00'
+const cron = 'every tue,wed,thu,fri 14:00'
 const tz = 'Asia/Tokyo'
 exports.puffLunchCron = functions.pubsub.schedule(cron).timeZone(tz).onRun(async () => {
   const calendar = await google.calendar()
