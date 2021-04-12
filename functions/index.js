@@ -178,7 +178,8 @@ exports.puffLunch = functions.region('asia-northeast1').https.onRequest(async (r
     console.log(userIds)
 
     const text = await getPuffLunchText(userIds, startTime, endTime)
-    const channel = functions.config().slack.channel_id.e_random
+    const env = functions.config().functions.env
+    const channel = functions.config().slack.channel_id[env]
     const slackResponse = await slackSendMessage(text, channel)
     console.log(text)
 
