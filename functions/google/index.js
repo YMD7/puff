@@ -1,5 +1,6 @@
 /* functions/google/index.js */
 
+const functions = require('firebase-functions')
 const { google } = require('googleapis')
 
 /******************************
@@ -10,7 +11,7 @@ exports.auth = async (scopes) => {
     const auth = new google.auth.JWT({
       keyFile: './keyfile.json',
       scopes,
-      subject: 'kato.a@edocode.co.jp'
+      subject: functions.config().google.delegated_user
     })
 
     return Promise.resolve(auth)

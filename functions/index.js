@@ -153,9 +153,12 @@ exports.puffLunchCron = functions.pubsub.schedule(cron).timeZone(tz).onRun(async
 exports.puffLunch = functions.region('asia-northeast1').https.onRequest(async (req, res) => {
   try {
     console.log('\n-------- Getting the next puff lunch date. --------')
+    const env = functions.config().functions.env
+
     const puffLunchDate = await getNextPuffLunch()
-    const startTime = dayjs.tz(puffLunchDate).hour(12).minute(30)
-    const endTime = dayjs.tz(puffLunchDate).hour(13).minute(30)
+    const offset = (env === 'development') ? 1 : 0
+    const startTime = dayjs.tz(puffLunchDate).hour(12).minute(30).add(offset, 'day')
+    const endTime = dayjs.tz(puffLunchDate).hour(13).minute(30).add(offset, 'day')
     const timeMin = new Date(startTime)
     const timeMax = new Date(endTime)
     console.log(`-------- Next puff lunch is on ${timeMin} --------`)
@@ -178,7 +181,7 @@ exports.puffLunch = functions.region('asia-northeast1').https.onRequest(async (r
     console.log(userIds)
 
     const text = await getPuffLunchText(userIds, startTime, endTime)
-    const channel = functions.config().slack.channel_id.e_random
+    const channel = functions.config().slack.channel_id[env]
     const slackResponse = await slackSendMessage(text, channel)
     console.log(text)
 
