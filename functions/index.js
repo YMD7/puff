@@ -121,13 +121,16 @@ const getReactionedPost = async (body) => {
 /******************************
  * Puff Lunch
  ******************************/
-const cron = 'every mon,tue,wed,thu,fri 14:00'
+const cron = 'every tue,wed,thu,fri 14:00'
 const tz = 'Asia/Tokyo'
 exports.puffLunchCron = functions.pubsub.schedule(cron).timeZone(tz).onRun(async () => {
-  const calendar = await google.calendar()
+  const scopes = [
+    'https://www.googleapis.com/auth/calendar'
+  ]
+  const calendar = await google.apis('calendar', 'v3', scopes)
   const timeMin = new Date(dayjs.tz().startOf('date'))
   const timeMax = new Date(dayjs.tz().endOf('date'))
-  console.log('Today is [ ' + dayjs.tz().format('YYYY/MM/DD ddd') + ' ].')
+  console.log('\n=== Today is [ ' + dayjs.tz().format('YYYY/MM/DD ddd') + ' ].\n')
 
   const res = await calendar.events.list({
     calendarId: 'ja.japanese#holiday@group.v.calendar.google.com',
@@ -220,10 +223,7 @@ const getNextPuffLunch = async () => {
 
 const getNextPuffLunchDate = async (d) => {
   const scopes = [
-    'https://www.googleapis.com/auth/calendar.readonly',
-    'https://www.googleapis.com/auth/calendar',
-    'https://www.googleapis.com/auth/calendar.events.readonly',
-    'https://www.googleapis.com/auth/calendar.events'
+    'https://www.googleapis.com/auth/calendar'
   ]
   const calendar = await google.apis('calendar', 'v3', scopes)
   const timeMin = new Date(d.startOf('date').format())
