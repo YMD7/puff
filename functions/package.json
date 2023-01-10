@@ -15,14 +15,14 @@
   "dependencies": {
     "@google-cloud/firestore": "^4.4.0",
     "@google-cloud/functions-framework": "^1.7.1",
-    "@slack/bolt": "^2.4.1",
+    "@slack/bolt": "^3.12.2",
     "@slack/events-api": "^2.3.4",
     "@slack/web-api": "^5.12.0",
     "axios": "^0.21.1",
     "dayjs": "^1.9.3",
     "dotenv": "^8.2.0",
     "firebase": "^7.23.0",
-    "firebase-admin": "^9.2.0",
+    "firebase-admin": "^11.4.1",
     "firebase-functions": "^3.11.0",
     "googleapis": "^61.0.0"
   },
